@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0K4X2NNFNB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-0K4X2NNFNB');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Skill-SD is a skill-conditioned self-distillation method for multi-turn LLM agents, improving sample efficiency on AppWorld and Sokoban."
+    >
+    <meta name="theme-color" content="#F5F0E0">
+    <title>Skill-SD: Skill-Conditioned Self-Distillation for Multi-turn LLM Agents</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;800&amp;display=swap"
+      rel="stylesheet"
+    >
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
+    <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-shell">
+        <a class="logo-box" href="#abstract" aria-label="Skill-SD home">SKILL&middot;SD</a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="#abstract">Abstract</a>
+          <span class="nav-sep" aria-hidden="true">·</span>
+          <a href="#method">Method</a>
+          <span class="nav-sep" aria-hidden="true">·</span>
+          <a href="#results">Results</a>
+          <span class="nav-sep" aria-hidden="true">·</span>
+          <a href="#bibtex">BibTeX</a>
+        </nav>
+        <a class="btn btn-primary btn-nav" href="https://arxiv.org/pdf/2604.10674" target="_blank" rel="noopener noreferrer">Read Paper <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </header>
+
+    <main>
+      <section class="section section-cream hero-section" id="abstract">
+        <div class="container">
+          <div class="hero-copy">
+            <p class="eyebrow">Skill-SD</p>
+            <div class="badge-pill">arXiv Preprint &middot; 2026</div>
+            <h1>Skill-Conditioned Self-Distillation for Multi-turn LLM Agents</h1>
+            <p class="hero-authors">
+              Hao Wang<sup>*†1,5</sup>, Guozhi Wang<sup>*‡5</sup>, Han Xiao<sup>*2</sup>, Yufeng Zhou<sup>5</sup>,
+              Yue Pan<sup>5</sup>, Jichao Wang<sup>1</sup>, Ke Xu<sup>3</sup>, Yafei Wen<sup>5</sup>,
+              Xiaohu Ruan<sup>5</sup>, Xiaoxin Chen<sup>5</sup>, Honggang Qi<sup>§4</sup>
+            </p>
+            <div class="hero-affiliations">
+              <span><sup>1</sup> Hangzhou Institute for Advanced Study, UCAS</span>
+              <span><sup>2</sup> The Chinese University of Hong Kong</span>
+              <span><sup>3</sup> University of Science and Technology of China</span>
+              <span><sup>4</sup> University of Chinese Academy of Sciences</span>
+              <span><sup>5</sup> vivo AI Lab</span>
+              <span class="affil-notes"><sup>*</sup>Equal contribution &nbsp; <sup>§</sup>Corresponding author &nbsp; <sup>‡</sup>Project lead &nbsp; <sup>†</sup>Intern at vivo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="container hero-below">
+          <div class="logo-row" aria-label="Institution logos">
+            <a href="https://english.ucas.ac.cn/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/logos/ucas.svg" alt="University of Chinese Academy of Sciences" height="40">
+            </a>
+            <a href="https://www.cuhk.edu.hk/english/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/logos/cuhk.svg" alt="The Chinese University of Hong Kong" height="40">
+            </a>
+            <a href="https://en.ustc.edu.cn/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/logos/ustc.png" alt="University of Science and Technology of China" height="40">
+            </a>
+            <a href="https://www.vivo.com/en/" target="_blank" rel="noopener noreferrer">
+              <img src="assets/logos/vivo.svg" alt="vivo AI Lab" height="40">
+            </a>
+          </div>
+          <div class="button-row">
+            <a class="btn btn-outline" href="https://arxiv.org/pdf/2604.10674" target="_blank" rel="noopener noreferrer">&#128196; Paper</a>
+            <a class="btn btn-primary btn-coming-soon" href="#" aria-disabled="true" tabindex="-1">&#128187; Code <span class="coming-soon-badge">Coming Soon</span></a>
+          </div>
+        </div>
+
+        <div class="container abstract-row">
+          <div class="abstract-card abstract-card-wide">
+            <p class="card-label">Abstract</p>
+            <p>
+              Reinforcement learning (RL) has been widely used to train LLM agents for multi-turn interactive
+              tasks, but its sample efficiency is severely limited by sparse rewards and long horizons.
+              On-policy self-distillation (OPSD) alleviates this by providing dense token-level supervision
+              from a privileged teacher that has access to ground-truth answers. However, such fixed
+              privileged information cannot capture the diverse valid strategies in agent tasks, and naively
+              combining OPSD with RL often leads to training collapse. To address these limitations, we
+              introduce Skill-SD, a framework that turns the agent&#39;s own trajectories into dynamic
+              training-only supervision. Completed trajectories are summarized into compact natural language
+              <em>skills</em> that describe successful behaviors, mistakes, and workflows. These skills serve
+              as dynamic privileged information conditioning only the teacher, while the student always acts
+              under the plain task prompt and learns to internalize the guidance through distillation. To
+              stabilize the training, we derive an importance-weighted reverse-KL loss to provide
+              gradient-correct token-level distillation, and dynamically synchronize the teacher with the
+              improving student. Experimental results on agentic benchmarks demonstrate that Skill-SD
+              substantially outperforms the standard RL baseline, improving both vanilla GRPO
+              (+14.0%/+10.9% on AppWorld/Sokoban) and vanilla OPD (+42.1%/+40.6%).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-yellow quote-banner">
+        <div class="container quote-shell">
+          <p class="quote-text">The helmsman sets the bearing.<br>The officer reads the wind.</p>
+          <p class="quote-subtext">Task reward from GRPO determines the overall direction; the skill-conditioned teacher supplies fine-grained, token-level guidance for the decisions in between.</p>
+        </div>
+      </section>
+
+      <section class="section section-cream">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Contributions</p>
+            <h2>Key Contributions</h2>
+          </div>
+          <div class="cards-grid cards-grid-3">
+            <article class="card">
+              <p class="card-icon" aria-hidden="true">&#128221;</p>
+              <h3>Dynamic Skill Summaries</h3>
+              <p>
+                Each completed trajectory is asynchronously summarized into a structured skill: success
+                patterns, mistake analysis, and a golden workflow.
+              </p>
+            </article>
+            <article class="card">
+              <p class="card-icon" aria-hidden="true">&#128105;&#8205;&#127979;</p>
+              <h3>Teacher-Only Guidance</h3>
+              <p>
+                Skills augment the teacher&#39;s prompt only. The student always operates under a clean task
+                prompt, eliminating train-test mismatch.
+              </p>
+            </article>
+            <article class="card">
+              <p class="card-icon" aria-hidden="true">&#9878;</p>
+              <h3>Gradient-Correct Distillation</h3>
+              <p>
+                An importance-weighted reverse-KL loss corrects per-token gradient bias caused by teacher and
+                student distribution mismatch.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-white" id="method">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Method</p>
+            <h2>How it works</h2>
+          </div>
+          <div class="steps-grid">
+            <article class="step-card">
+              <div class="step-chip">01</div>
+              <h3>Plain-Prompt On-Policy Rollouts</h3>
+              <p>The student generates rollouts using only the task prompt — no distilled skills — preserving identical train/test conditioning.</p>
+            </article>
+            <article class="step-card">
+              <div class="step-chip">02</div>
+              <h3>Trajectory-to-Skill Distillation</h3>
+              <p>An auxiliary LLM compresses each episode into a reusable skill summary of successes, failures, and workflow.</p>
+            </article>
+            <article class="step-card">
+              <div class="step-chip">03</div>
+              <h3>Teacher-Only Skill Replay</h3>
+              <p>Retrieved skills go only to the teacher, which re-scores the trajectory token by token — student inputs stay unchanged.</p>
+            </article>
+            <article class="step-card">
+              <div class="step-chip">04</div>
+              <h3>Joint RL + Distillation</h3>
+              <p>GRPO handles trajectory-level reward; importance-weighted reverse-KL distills token-level guidance and corrects teacher-student mismatch.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-cream">
+        <div class="container method-figure-shell">
+          <div class="section-heading section-heading-center">
+            <p class="eyebrow">Pipeline</p>
+            <h2>Method Overview</h2>
+          </div>
+          <figure class="framed-figure method-figure">
+            <img
+              src="assets/skill-sd-overview.png"
+              alt="Skill-SD method overview showing student rollouts, skill extraction, and distillation"
+              width="900"
+              height="650"
+              loading="lazy"
+            >
+            <figcaption>
+              Skill-SD pipeline: student rollouts &rarr; skill extraction &rarr; importance-weighted
+              distillation.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section section-white" id="skills">
+        <div class="container">
+          <div class="section-heading skill-section-heading">
+            <p class="eyebrow">Appendix Insight</p>
+            <h2>What a Skill Looks Like</h2>
+          </div>
+
+          <div class="skill-section-intro">
+            <p>
+              Skill-SD does not archive full trajectories as supervision. Each completed attempt is compressed into a
+              compact teacher-only JSON artifact that records what to reuse, what to avoid, and what the next best rollout
+              should do.
+            </p>
+            <div class="skill-section-note" aria-label="Teacher-only prompt artifact">
+              <span class="skill-section-note-label">Teacher-Only Prompt</span>
+              <span class="skill-section-note-text">
+                Distilled after a completed attempt, injected only during distillation.
+              </span>
+            </div>
+          </div>
+
+          <div class="skill-showcase" data-active-field="success">
+            <div class="skill-field-list" role="group" aria-label="Skill fields">
+              <button
+                class="skill-field-card skill-field-card-success is-active"
+                type="button"
+                data-skill-field="success"
+                data-skill-title="success_analysis"
+                aria-pressed="true"
+                aria-controls="skill-json-view"
+              >
+                <span class="skill-field-symbol" aria-hidden="true">✓</span>
+                <span class="skill-field-kicker">Reuse the right instinct</span>
+                <h3><code>success_analysis</code></h3>
+                <p>What strategic intent was correct and should be reused on future attempts.</p>
+              </button>
+
+              <button
+                class="skill-field-card skill-field-card-mistake"
+                type="button"
+                data-skill-field="mistake"
+                data-skill-title="mistake_analysis"
+                aria-pressed="false"
+                aria-controls="skill-json-view"
+              >
+                <span class="skill-field-symbol" aria-hidden="true">✗</span>
+                <span class="skill-field-kicker">Audit the failure</span>
+                <h3><code>mistake_analysis</code></h3>
+                <p>What failed, why it failed, and which assumptions or API mistakes caused the error.</p>
+              </button>
+
+              <button
+                class="skill-field-card skill-field-card-golden"
+                type="button"
+                data-skill-field="golden"
+                data-skill-title="golden_workflow"
+                aria-pressed="false"
+                aria-controls="skill-json-view"
+              >
+                <span class="skill-field-symbol" aria-hidden="true">✦</span>
+                <span class="skill-field-kicker">Stage the ideal rollout</span>
+                <h3><code>golden_workflow</code></h3>
+                <p>A concise ideal process the teacher can use to guide the student at the token level.</p>
+              </button>
+            </div>
+
+            <div class="skill-json-view" id="skill-json-view" aria-live="polite">
+              <div class="skill-json-header">
+                <div class="skill-json-dots" aria-hidden="true">
+                  <span></span><span></span><span></span>
+                </div>
+                <p class="skill-json-filename">skill.json</p>
+                <div class="skill-json-badges" aria-hidden="true">
+                  <span class="skill-json-badge skill-json-badge-success is-active" data-skill-badge="success">success_analysis</span>
+                  <span class="skill-json-badge skill-json-badge-mistake" data-skill-badge="mistake">mistake_analysis</span>
+                  <span class="skill-json-badge skill-json-badge-golden" data-skill-badge="golden">golden_workflow</span>
+                </div>
+              </div>
+
+              <ol class="skill-json-lines" aria-label="Serialized skill example">
+                <li class="skill-json-line"><span class="skill-json-punc">{</span></li>
+                <li class="skill-json-line skill-json-field skill-json-field-success is-active" data-skill-panel="success">
+                  <span class="skill-json-punc">"</span><span class="skill-json-key skill-json-key-success">success_analysis</span><span class="skill-json-punc">"</span><span class="skill-json-punc">: </span><span class="skill-json-string">"Using task-specific apps and authenticating restricted APIs first is the right strategy."</span><span class="skill-json-punc">,</span>
+                </li>
+                <li class="skill-json-line skill-json-field skill-json-field-mistake" data-skill-panel="mistake">
+                  <span class="skill-json-punc">"</span><span class="skill-json-key skill-json-key-mistake">mistake_analysis</span><span class="skill-json-punc">"</span><span class="skill-json-punc">: </span><span class="skill-json-string">"The main failure came from acting on unverified assumptions and calling restricted APIs before checking authentication and parameter requirements."</span><span class="skill-json-punc">,</span>
+                </li>
+                <li class="skill-json-line skill-json-field skill-json-field-golden" data-skill-panel="golden">
+                  <span class="skill-json-punc">"</span><span class="skill-json-key skill-json-key-golden">golden_workflow</span><span class="skill-json-punc">"</span><span class="skill-json-punc">: </span><span class="skill-json-string">"1. Retrieve the actual bill from the file system. 2. Get roommate contact info via the contact app. 3. Authenticate Venmo, compute each share, and send the payment requests with the correct API calls."</span>
+                </li>
+                <li class="skill-json-line"><span class="skill-json-punc">}</span></li>
+              </ol>
+
+              <div class="skill-json-footer">
+                <p class="skill-json-caption">
+                  Active field: <strong class="skill-json-current" data-skill-current>success_analysis</strong>
+                  &middot; click a card to spotlight how the distilled attempt is serialized for the teacher.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-white" id="results">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Benchmark Results</p>
+            <h2>Results on AppWorld &amp; Sokoban</h2>
+          </div>
+          <p style="font-size:0.84rem;color:var(--muted);margin-bottom:10px;">Model: Qwen3-4B-Instruct-2507. Subscripts denote absolute change from the base model.</p>
+          <div class="table-wrap">
+            <table aria-label="Main Skill-SD results on AppWorld and Sokoban">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2">Method</th>
+                  <th scope="col" colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">AppWorld</th>
+                  <th scope="col" colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">Sokoban</th>
+                  <th scope="col" colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">Avg.</th>
+                </tr>
+                <tr>
+                  <th scope="col">Acc.</th>
+                  <th scope="col">Comp.</th>
+                  <th scope="col">Acc.</th>
+                  <th scope="col">Comp.</th>
+                  <th scope="col">Acc.</th>
+                  <th scope="col">Comp.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Base Model</td>
+                  <td>8.8%</td><td>39.1%</td>
+                  <td>12.5%</td><td>32.0%</td>
+                  <td>10.6%</td><td>35.6%</td>
+                </tr>
+                <tr>
+                  <td>Vanilla OPD</td>
+                  <td>22.8%<sub>+14.0</sub></td><td>59.7%<sub>+20.6</sub></td>
+                  <td>21.9%<sub>+9.4</sub></td><td>37.5%<sub>+5.5</sub></td>
+                  <td>22.4%<sub>+11.7</sub></td><td>48.6%<sub>+13.0</sub></td>
+                </tr>
+                <tr>
+                  <td>Vanilla GRPO</td>
+                  <td>50.9%<sub>+42.1</sub></td><td>76.3%<sub>+37.2</sub></td>
+                  <td>51.6%<sub>+39.1</sub></td><td>68.8%<sub>+36.8</sub></td>
+                  <td>51.2%<sub>+40.6</sub></td><td>72.5%<sub>+36.9</sub></td>
+                </tr>
+                <tr>
+                  <td>Skill-Augmented GRPO</td>
+                  <td>42.1%<sub>+33.3</sub></td><td>76.1%<sub>+37.0</sub></td>
+                  <td>20.3%<sub>+7.8</sub></td><td>37.5%<sub>+5.5</sub></td>
+                  <td>31.2%<sub>+20.6</sub></td><td>56.8%<sub>+21.2</sub></td>
+                </tr>
+                <tr class="highlight-row">
+                  <td><strong>Skill-SD (Ours)</strong></td>
+                  <td><strong>64.9%</strong><sub>+56.1</sub></td><td><strong>84.9%</strong><sub>+45.8</sub></td>
+                  <td><strong>62.5%</strong><sub>+50.0</sub></td><td><strong>71.1%</strong><sub>+39.1</sub></td>
+                  <td><strong>63.7%</strong><sub>+53.1</sub></td><td><strong>78.0%</strong><sub>+42.4</sub></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="figure-grid figure-grid-2">
+            <figure class="framed-figure">
+              <img
+                src="assets/appworld-results.png"
+                alt="AppWorld training curves for Skill-SD and baselines"
+                width="760"
+                height="520"
+                loading="lazy"
+              >
+              <figcaption>AppWorld training curves</figcaption>
+            </figure>
+            <figure class="framed-figure">
+              <img
+                src="assets/sokoban-results.png"
+                alt="Sokoban training curves for Skill-SD and baselines"
+                width="760"
+                height="520"
+                loading="lazy"
+              >
+              <figcaption>Sokoban training curves</figcaption>
+            </figure>
+          </div>
+
+          <aside class="insight-callout">
+            <p class="insight-label">Why does Skill-Augmented GRPO excel on AppWorld but collapse on Sokoban?</p>
+            <p>Skill-Augmented GRPO injects skills into the <em>student's</em> prompt during training — but at evaluation the agent receives no skills. On AppWorld it achieves the highest <em>training</em> score of any method, yet collapses at test time: a direct consequence of optimizing a skill-conditioned policy that diverges from the plain evaluation policy (train-test mismatch). On Sokoban, skills actively disrupt spatial reasoning <em>even during training</em>, causing the method to underperform even Vanilla GRPO. Skill-SD avoids both failure modes by confining skills to a training-only teacher branch, so the student internalizes guidance through gradient-based distillation rather than prompt-level injection.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section section-cream">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">Ablations</p>
+            <h2>Ablation Study</h2>
+          </div>
+          <div class="cards-grid cards-grid-3">
+            <article class="card">
+              <h3>Student-Owned Rollout Is Essential</h3>
+              <p>
+                Both off-policy variants collapse during mid-training. The failure is especially severe on Sokoban,
+                where off-policy accuracy drops to 12.5% or 10.9% — matching the uninstructed base model.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Dynamic Sync Keeps the Teacher Calibrated</h3>
+              <p>
+                Within on-policy training, synchronizing the teacher from the latest student checkpoint adds
+                +15.8 pp on AppWorld and +12.5 pp on Sokoban over a frozen teacher.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Skills Should Guide the Teacher</h3>
+              <p>
+                Directly prepending skills to the student hurts performance: Skill-Augmented GRPO underperforms
+                Vanilla GRPO on both AppWorld (42.1% vs. 50.9%) and Sokoban (20.3% vs. 51.6%).
+              </p>
+            </article>
+          </div>
+
+          <p style="font-size:0.84rem;color:var(--muted);margin-bottom:10px;margin-top:28px;">Subscripts denote absolute change from Skill-SD. <sup>*</sup>Training collapsed during mid-training; values reflect the checkpoint before collapse.</p>
+          <div class="table-wrap" style="margin-bottom:28px;">
+            <table aria-label="Ablation results">
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2">Rollout</th>
+                  <th scope="col" rowspan="2">Teacher</th>
+                  <th scope="col" colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">AppWorld</th>
+                  <th scope="col" colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">Sokoban</th>
+                  <th scope="col" colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">Avg.</th>
+                </tr>
+                <tr>
+                  <th scope="col">Acc.</th><th scope="col">Comp.</th>
+                  <th scope="col">Acc.</th><th scope="col">Comp.</th>
+                  <th scope="col">Acc.</th><th scope="col">Comp.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>On-policy</td><td>Frozen</td>
+                  <td>49.1%<sub>−15.8</sub></td><td>79.0%<sub>−5.9</sub></td>
+                  <td>50.0%<sub>−12.5</sub></td><td>63.3%<sub>−7.8</sub></td>
+                  <td>49.6%<sub>−14.1</sub></td><td>71.1%<sub>−6.9</sub></td>
+                </tr>
+                <tr class="highlight-row">
+                  <td><strong>On-policy</strong></td><td><strong>Dynamic</strong></td>
+                  <td><strong>64.9%</strong></td><td><strong>84.9%</strong></td>
+                  <td><strong>62.5%</strong></td><td><strong>71.1%</strong></td>
+                  <td><strong>63.7%</strong></td><td><strong>78.0%</strong></td>
+                </tr>
+                <tr style="color:#888">
+                  <td>Off-policy<sup>*</sup></td><td>Frozen</td>
+                  <td>45.6%<sub>−19.3</sub></td><td>78.8%<sub>−6.1</sub></td>
+                  <td>12.5%<sub>−50.0</sub></td><td>31.3%<sub>−39.8</sub></td>
+                  <td>29.1%<sub>−34.6</sub></td><td>55.0%<sub>−23.0</sub></td>
+                </tr>
+                <tr style="color:#888">
+                  <td>Off-policy<sup>*</sup></td><td>Dynamic</td>
+                  <td>42.1%<sub>−22.8</sub></td><td>76.5%<sub>−8.4</sub></td>
+                  <td>10.9%<sub>−51.6</sub></td><td>32.0%<sub>−39.1</sub></td>
+                  <td>26.5%<sub>−37.2</sub></td><td>54.3%<sub>−23.7</sub></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section-heading" style="margin-top:40px;">
+            <p class="eyebrow">Optimization Dynamics</p>
+            <h2>Teacher and Student Distributions Converge During SDL</h2>
+          </div>
+          <figure class="framed-figure wide-figure">
+            <img
+              src="assets/self-distillation.png"
+              alt="Token-level self-distillation dynamics showing teacher-student distribution alignment and declining SDL loss"
+              width="1000"
+              height="520"
+              loading="lazy"
+            >
+            <figcaption>
+              On a representative AppWorld task, teacher and student token distributions become progressively aligned.
+              The SDL loss decreases by 59.3% over training.
+            </figcaption>
+          </figure>
+
+          <div class="figure-grid figure-grid-2" style="margin-top:24px;">
+            <figure class="framed-figure">
+              <img
+                src="assets/appworld-ablation.png"
+                alt="AppWorld training dynamics for four rollout-teacher configurations: on-policy dynamic, on-policy frozen, off-policy frozen, off-policy dynamic"
+                width="760"
+                height="520"
+                loading="lazy"
+              >
+              <figcaption>AppWorld training dynamics of the four rollout–teacher configurations</figcaption>
+            </figure>
+            <figure class="framed-figure">
+              <img
+                src="assets/sokoban-ablation.png"
+                alt="Sokoban training dynamics for four rollout-teacher configurations: on-policy dynamic, on-policy frozen, off-policy frozen, off-policy dynamic"
+                width="760"
+                height="520"
+                loading="lazy"
+              >
+              <figcaption>Sokoban training dynamics of the four rollout–teacher configurations</figcaption>
+            </figure>
+          </div>
+
+          <div class="section-heading" style="margin-top:44px;">
+            <p class="eyebrow">Hyperparameter Sweep</p>
+            <h2>SDL Coefficient &lambda; on AppWorld</h2>
+          </div>
+          <p style="max-width:56rem;color:var(--muted);margin-bottom:20px;">
+            The SDL coefficient mediates the RL–distillation trade-off. &lambda; = 0.001 achieves 81.19% validation completion,
+            acting as a mild shaping term that guides the student without dominating the RL signal.
+          </p>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:28px;align-items:center;">
+            <div class="table-wrap" style="margin-bottom:0;">
+              <table aria-label="SDL coefficient lambda sweep on AppWorld">
+                <thead>
+                  <tr>
+                    <th scope="col">&lambda;</th>
+                    <th scope="col">Val. Completion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0.01</td>
+                    <td>Unstable, below optimum</td>
+                  </tr>
+                  <tr>
+                    <td>0.005</td>
+                    <td>74.66%</td>
+                  </tr>
+                  <tr class="highlight-row">
+                    <td><strong>0.001</strong></td>
+                    <td><strong>81.19% (best)</strong></td>
+                  </tr>
+                  <tr>
+                    <td>0.0005</td>
+                    <td>75.98%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figure class="framed-figure figure-reveal-x" style="margin:0;">
+              <img
+                src="assets/lambda-ablation.png"
+                alt="AppWorld training and validation completion rate curves for four SDL coefficient values"
+                width="1200"
+                height="442"
+              >
+              <figcaption>&lambda; = 0.001 achieves the best validation performance on AppWorld.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+<section class="section section-yellow cta-banner">
+        <div class="container cta-shell" style="flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;">
+          <div style="max-width:52rem;">
+            <p class="eyebrow">Training Principle</p>
+            <h2 style="max-width:15ch;margin:0 auto;">Reward sets the&nbsp;course.<br>Skill refines each&nbsp;turn.</h2>
+            <p class="cta-subtext" style="max-width:46rem;margin:14px auto 0;">
+              GRPO provides global direction; the skill-conditioned teacher refines delicate token choices during training.
+              At inference, the student uses only the plain task prompt.
+            </p>
+          </div>
+          <a class="btn btn-primary" href="https://arxiv.org/abs/2604.10674" target="_blank" rel="noopener noreferrer" style="width:auto;min-width:260px;padding-inline:30px;">
+            Read the arXiv preprint <span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="section section-dark" id="bibtex">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow eyebrow-light">Citation</p>
+            <h2 class="heading-light">Cite this work</h2>
+          </div>
+          <div class="bibtex-shell">
+            <button class="btn btn-copy" id="copy-bibtex" type="button">Copy BibTeX</button>
+            <pre><code id="bibtex-code">@misc{wang2026skillsdskillconditionedselfdistillationmultiturn,
+  title={Skill-SD: Skill-Conditioned Self-Distillation for Multi-turn LLM Agents},
+  author={Hao Wang and Guozhi Wang and Han Xiao and Yufeng Zhou and Yue Pan and Jichao Wang and Ke Xu and Yafei Wen and Xiaohu Ruan and Xiaoxin Chen and Honggang Qi},
+  year={2026},
+  eprint={2604.10674},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG},
+  url={https://arxiv.org/abs/2604.10674},
+}</code></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-shell">
+        <p>&copy; 2026 Skill-SD Authors</p>
+        <p>UCAS &middot; CUHK &middot; USTC &middot; vivo AI Lab</p>
+      </div>
+    </footer>
+
+    <script>
+      // Scroll-triggered entrance animations
+      (function () {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.08 });
+
+        // Observe section headings, cards, figures, table
+        document.querySelectorAll(
+          ".section-heading, .abstract-card, .table-wrap, .quote-shell, .cta-shell"
+        ).forEach(function (el) {
+          el.classList.add("anim");
+          observer.observe(el);
+        });
+
+        // Stagger cards and step-cards within grids
+        document.querySelectorAll(".cards-grid, .steps-grid, .figure-grid").forEach(function (grid) {
+          grid.querySelectorAll(".card, .step-card, .framed-figure").forEach(function (child, i) {
+            child.classList.add("anim", "anim-d" + Math.min(i + 1, 4));
+            observer.observe(child);
+          });
+        });
+
+        // Counter animation for stat values
+        function animateCounter(el, target, decimals) {
+          var start = 0;
+          var duration = 900;
+          var startTime = null;
+          function step(ts) {
+            if (!startTime) startTime = ts;
+            var progress = Math.min((ts - startTime) / duration, 1);
+            var ease = 1 - Math.pow(1 - progress, 3);
+            el.textContent = (ease * target).toFixed(decimals) + "%";
+            if (progress < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        }
+
+        var statsObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var el = entry.target;
+              var val = parseFloat(el.dataset.target);
+              var dec = el.dataset.decimals ? parseInt(el.dataset.decimals) : 1;
+              animateCounter(el, val, dec);
+              statsObserver.unobserve(el);
+            }
+          });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll(".stat-value").forEach(function (el) {
+          var text = el.textContent.replace("%", "").trim();
+          el.dataset.target = text;
+          el.dataset.decimals = (text.indexOf(".") !== -1) ? text.split(".")[1].length : 0;
+          el.textContent = "0%";
+          statsObserver.observe(el);
+        });
+      })();
+
+      // 1. Scroll progress bar
+      (function () {
+        var header = document.querySelector(".site-header");
+        if (!header) return;
+        var ticking = false;
+        function updateProgress() {
+          var doc = document.documentElement;
+          var max = doc.scrollHeight - window.innerHeight;
+          header.style.setProperty("--scroll-progress", max > 0 ? (window.scrollY / max).toFixed(4) : 0);
+          ticking = false;
+        }
+        function req() { if (!ticking) { ticking = true; requestAnimationFrame(updateProgress); } }
+        window.addEventListener("scroll", req, { passive: true });
+        window.addEventListener("resize", req);
+        updateProgress();
+      })();
+
+      // 2. Card 3D tilt
+      (function () {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (!window.matchMedia("(pointer: fine)").matches) return;
+        document.querySelectorAll(".card, .step-card").forEach(function (card) {
+          var cx = 0, cy = 0, tx = 0, ty = 0, frame = null;
+          function render() {
+            cx += (tx - cx) * 0.14; cy += (ty - cy) * 0.14;
+            card.style.setProperty("--card-rotate-x", cx.toFixed(2) + "deg");
+            card.style.setProperty("--card-rotate-y", cy.toFixed(2) + "deg");
+            frame = (Math.abs(tx - cx) > 0.03 || Math.abs(ty - cy) > 0.03) ? requestAnimationFrame(render) : null;
+          }
+          card.addEventListener("pointermove", function (e) {
+            var r = card.getBoundingClientRect();
+            tx = (0.5 - (e.clientY - r.top) / r.height) * 12;
+            ty = ((e.clientX - r.left) / r.width - 0.5) * 12;
+            if (!frame) frame = requestAnimationFrame(render);
+          });
+          card.addEventListener("pointerleave", function () {
+            tx = 0; ty = 0;
+            if (!frame) frame = requestAnimationFrame(render);
+          });
+        });
+      })();
+
+      // 3. Scroll spy nav
+      (function () {
+        var links = Array.from(document.querySelectorAll('.site-nav a[href^="#"]'));
+        var header = document.querySelector(".site-header");
+        var sections = links.map(function (l) { return document.querySelector(l.getAttribute("href")); }).filter(Boolean);
+        var ticking = false;
+        function update() {
+          var offset = (header ? header.offsetHeight : 0) + 36;
+          var current = sections[0];
+          sections.forEach(function (s) { if (s.getBoundingClientRect().top - offset <= 0) current = s; });
+          // At bottom of page, force last section active
+          if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 60) {
+            current = sections[sections.length - 1];
+          }
+          var active = "#" + current.id;
+          links.forEach(function (l) { l.classList.toggle("is-active", l.getAttribute("href") === active); });
+          ticking = false;
+        }
+        function req() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+        window.addEventListener("scroll", req, { passive: true });
+        window.addEventListener("resize", req);
+        update();
+      })();
+
+      // 3b. Heading word hover
+      (function () {
+        function wrapWords(el) {
+          var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+          var textNodes = [];
+          while (walker.nextNode()) {
+            var node = walker.currentNode;
+            var p = node.parentNode;
+            var skip = false;
+            while (p && p !== el) {
+              if (p.tagName === "CODE" || p.tagName === "SUP") { skip = true; break; }
+              p = p.parentNode;
+            }
+            if (!skip) { textNodes.push(node); }
+          }
+          textNodes.forEach(function (node) {
+            var frag = document.createDocumentFragment();
+            node.textContent.split(/([ ]+)/).forEach(function (part) {
+              if (!part.length) { return; }
+              if (/^[ ]+$/.test(part)) {
+                frag.appendChild(document.createTextNode(part));
+              } else {
+                var span = document.createElement("span");
+                span.className = "h-word";
+                span.textContent = part;
+                frag.appendChild(span);
+              }
+            });
+            node.parentNode.replaceChild(frag, node);
+          });
+        }
+        var targets = Array.from(document.querySelectorAll(
+          ".section-heading h2, .card h3, .step-card h3, .quote-text, .cta-banner h2"
+        ));
+        targets.forEach(wrapWords);
+      })();
+
+      // 4. Figure image reveal
+      (function () {
+        var rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var figures = Array.from(document.querySelectorAll(".framed-figure"));
+        figures.forEach(function (f, i) { f.classList.add(i % 2 === 0 ? "figure-reveal-x" : "figure-reveal-y"); });
+        if (rm) { figures.forEach(function (f) { f.classList.add("is-revealed"); }); return; }
+        var obs = new IntersectionObserver(function (entries, o) {
+          entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("is-revealed"); o.unobserve(e.target); } });
+        }, { threshold: 0.24 });
+        figures.forEach(function (f) { obs.observe(f); });
+      })();
+
+      // 5. Table row stagger
+      (function () {
+        var rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        document.querySelectorAll(".table-wrap").forEach(function (table) {
+          var rows = table.querySelectorAll("tbody tr");
+          rows.forEach(function (r, i) { r.style.setProperty("--row-stagger", i); });
+          if (rm) { rows.forEach(function (r) { r.classList.add("is-row-visible"); }); return; }
+          table.classList.add("rows-ready");
+          new IntersectionObserver(function (entries, o) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) {
+                e.target.querySelectorAll("tbody tr").forEach(function (r) { r.classList.add("is-row-visible"); });
+                o.unobserve(e.target);
+              }
+            });
+          }, { threshold: 0.28 }).observe(table);
+        });
+      })();
+
+      // 6. Hero word-by-word reveal
+      (function () {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var title = document.querySelector(".hero-copy h1");
+        if (!title) return;
+        var parts = title.textContent.trim().split(/(\s+)/);
+        var frag = document.createDocumentFragment();
+        var wi = 0;
+        parts.forEach(function (part) {
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          var span = document.createElement("span");
+          span.className = "hero-word";
+          span.style.setProperty("--word-index", wi++);
+          span.textContent = part;
+          frag.appendChild(span);
+        });
+        title.textContent = "";
+        title.appendChild(frag);
+      })();
+
+      // BibTeX copy button
+      (function () {
+        var copyButton = document.getElementById("copy-bibtex");
+        var bibtexCode = document.getElementById("bibtex-code");
+        if (!copyButton || !bibtexCode) { return; }
+
+        var defaultLabel = copyButton.textContent;
+        var resetTimer;
+
+        function setState(state, label) {
+          clearTimeout(resetTimer);
+          copyButton.dataset.copyState = state;
+          copyButton.textContent = label;
+          resetTimer = window.setTimeout(function () {
+            delete copyButton.dataset.copyState;
+            copyButton.textContent = defaultLabel;
+          }, 1800);
+        }
+
+        copyButton.addEventListener("click", function () {
+          var text = bibtexCode.textContent;
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(
+              function () { setState("success", "Copied \u2713"); },
+              function () { setState("error", "Copy failed"); }
+            );
+            return;
+          }
+
+          var fallback = document.createElement("textarea");
+          fallback.value = text;
+          fallback.setAttribute("readonly", "");
+          fallback.style.position = "absolute";
+          fallback.style.left = "-9999px";
+          document.body.appendChild(fallback);
+          fallback.select();
+
+          try {
+            document.execCommand("copy");
+            setState("success", "Copied \u2713");
+          } catch (error) {
+            setState("error", "Copy failed");
+          }
+
+          document.body.removeChild(fallback);
+        });
+      })();
+    </script>
+    <script>
+      // Skills section — card ↔ JSON field interaction
+      (function () {
+        var showcase = document.querySelector("#skills .skill-showcase");
+        if (!showcase) { return; }
+        var cards   = showcase.querySelectorAll(".skill-field-card");
+        var fields  = showcase.querySelectorAll(".skill-json-field");
+        var badges  = showcase.querySelectorAll(".skill-json-badge");
+        var current = showcase.querySelector("[data-skill-current]");
+
+        function setActive(card) {
+          var field = card.dataset.skillField;
+          var title = card.dataset.skillTitle;
+          showcase.dataset.activeField = field;
+          cards.forEach(function (item) {
+            var active = item === card;
+            item.classList.toggle("is-active", active);
+            item.setAttribute("aria-pressed", active ? "true" : "false");
+          });
+          fields.forEach(function (item) { item.classList.toggle("is-active", item.dataset.skillPanel === field); });
+          badges.forEach(function (item) { item.classList.toggle("is-active", item.dataset.skillBadge === field); });
+          if (current) { current.textContent = title; }
+        }
+
+        cards.forEach(function (card) {
+          card.addEventListener("click", function () { setActive(card); });
+          card.addEventListener("focus", function () { setActive(card); });
+        });
+      })();
+    </script>
+  </body>
+</html>
